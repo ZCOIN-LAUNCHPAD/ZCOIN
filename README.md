@@ -1,6 +1,7 @@
 <!--
   ZCOIN Launchpad — README.md
-  Nerfed / Redacted: external RPC, program IDs, secrets, and file paths are templated.
+  Branding: site=https://0xzerebro.io • X/Twitter=@zCoinfdn
+  Nerfed/Redacted: external RPC, program IDs, secrets, and file paths are templated.
 -->
 
 <p align="center">
@@ -20,6 +21,8 @@
 </p>
 
 <p align="center">
+  <a href="https://0xzerebro.io"><img src="https://img.shields.io/badge/Website-0xzerebro.io-blue" alt="site"></a>
+  <a href="https://x.com/zCoinfdn"><img src="https://img.shields.io/badge/X-@zCoinfdn-black?logo=x" alt="x"></a>
   <img src="https://img.shields.io/badge/License-MIT-informational" alt="license">
   <img src="https://img.shields.io/badge/Database-lowdb-lightgrey" alt="lowdb">
   <img src="https://img.shields.io/badge/WebSockets-ws-ff69b4" alt="ws">
@@ -34,9 +37,9 @@
 - `POST /confirm-creation` — verifies tx, extracts pool address, **indexes token** in lowdb, awards quests.
 - Realtime chat: WebSocket channels per-token.
 - Stats/feeds: platform stats, top tokens, historical charts, holders, leaderboard, bounties, comments, nicknames.
-- **Nerfed/Redacted** bits are templated like `"<YOUR_...>"`. Replace with your real values.
+- **Nerfed/Redacted** bits are templated like "<YOUR_...>". Replace with your real values.
 
-> **Branding:** All references updated to **ZCOIN Launchpad / ZCOIN**.
+> **Branding:** All references updated to **ZCOIN Launchpad / ZCOIN**. Public links point to **https://0xzerebro.io** and **https://x.com/zCoinfdn**.
 
 ---
 
@@ -44,7 +47,8 @@
 
 - Product: **ZCOIN Launchpad**
 - Ticker/Examples: **ZCOIN**
-- Default site (example): `https://zcoin.launch/` *(placeholder)*
+- Website: **https://0xzerebro.io**
+- X/Twitter: **https://x.com/zCoinfdn**
 
 ---
 
@@ -108,7 +112,7 @@ RENDER=false
 SOLANA_RPC_URL=<YOUR_SOLANA_MAINNET_RPC_URL>  # e.g., https://<provider>/<key>
 ```
 
-> **Note:** The code currently defaults to a placeholder RPC in server; swap it to `process.env.SOLANA_RPC_URL` for production.
+> The server should use: `new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com', 'confirmed')`
 
 ---
 
@@ -144,181 +148,19 @@ ZCOIN Launchpad server running on http://localhost:3000
 
 ---
 
-## 🧩 Key Redactions (Nerfed)
+## 🔌 REST API (selected)
 
-- **RPC URL** → `SOLANA_RPC_URL` env.
-- **Program IDs** → keep your own; placeholders in docs.
-- **External fee config list** → example keys shown as comments.
-- **Brand** → ZCOIN Launchpad/ZCOIN.
-- **Default links** like `createdOn` set to `https://zcoin.launch/` (placeholder).
-
----
-
-## 🔌 REST API
-
-### Upload
-```http
-POST /upload-file
-multipart/form-data: file=<binary>, target=/data (optional)
-```
-Saves file to `/data` (Render) or local.
-
-### Create Pool
-```http
-POST /create
-Content-Type: multipart/form-data
-fields: name, symbol, description, website, twitter, quote (SOL|USDC|...), deployer (pubkey), initialBuyAmount (optional)
-file: image (optional)
-```
-- Pins image + metadata to IPFS (Pinata)
-- Returns `{ transaction, baseMint, keypairFile, uri, imageUrl }` (base64 tx unsigned by server).
-
-### Sign & Send
-```http
-POST /sign-and-send
-{
-  "userSignedTransaction": "<BASE64>",
-  "keypairFile": "<FILENAME_FROM_CREATE>"
-}
-```
-Server partial-signs with **mint vanity keypair** and broadcasts.
-
-### Confirm Creation
-```http
-POST /confirm-creation
-{
-  "signature": "<tx sig>",
-  "baseMint": "<mint>",
-  "quote": "SOL",
-  "deployer": "<pubkey>",
-  "name": "MyToken",
-  "symbol": "ZCOIN",
-  "description": "desc",
-  "keypairFile": "<vanity.json>",
-  "uri": "https://ipfs/...json",
-  "website": "https://...",
-  "twitter": "https://twitter.com/...",
-  "imageUrl": "https://ipfs/...png"
-}
-```
-- Verifies chain tx and extracts **pool address** from instructions.
-- Indexes token in DB, moves vanity key to `/vanity/used/`, and awards quests.
-
-### Token Image Proxy (cached)
-```http
-GET /token-image?url=<http-url>
-```
-- Caches to `/image_cache`. On failure, returns `/public/zcoin.png`.
-
-### Comments
-```http
-GET  /api/comments/:tokenMint       # last 24h, enriched with nickname
-POST /api/comments                   # { tokenMint, wallet, text }
-```
-
-### Nickname
-```http
-POST /api/nickname  # { walletAddress, nickname } (max 20 chars, 5 changes/month)
-```
-
-### Leaderboard
-```http
-GET /api/leaderboard?page=1&search=term
-```
-
-### Top Tokens (by internal trade volume)
-```http
-GET /api/top-tokens
-```
-
-### Bounties (example/demo)
-```http
-GET /api/bounties/:walletAddress
-```
-> Copy updates: strings now reference **ZCOIN Launchpad** instead of old branding.
-
-### Platform Stats
-```http
-GET /platform-stats
-```
-Returns totals, top-5 by volume/mcap, and estimated platform earnings.
-
-### Historical Stats (for charts)
-```http
-GET /historical-stats
-```
-
-### Wallet Profile
-```http
-GET /api/profile/:walletAddress
-```
-- Recent activity, unlocked achievements, basic holdings (via Jupiter holders).
-
-### All Tokens / User Tokens
-```http
-GET /all-tokens
-GET /tokens?deployer=<pubkey>
-```
-
-### DBC Fee Helpers
-```http
-POST /quote-fees   # { poolAddresses: [ "...", ... ] } -> { [pool]: unclaimed }
-POST /claim-fees   # { poolAddress, ownerWallet } -> { transaction }
-```
-
----
-
-## 🔊 WebSockets
-
-- Connect to the same origin as HTTP.
-- Messages:
-  - `{"type":"subscribe","token":"<baseMint>"}` — join room.
-  - `{"type":"chatMessage","wallet":"<pubkey>","text":"Hello"}` — broadcast in room.
-- Server sends:
-  - `{"type":"history","messages":[...]}` — last 2 minutes.
-  - `{"type":"newMessage","message":{...}}` — realtime.
-
-> Chat history pruned every 30s to keep last 2 minutes only.
-
----
-
-## 🧠 Quests & Points (Server Engine)
-
-- Volume milestones, single large trades, first trade, pioneer (early buyers), sniper (<=30s after launch), flips (profit heuristic).
-- New trades fetched every 30s from **Jupiter Data API** (nerfed URL pattern remains).
-
----
-
-## 🔁 Auto-Migration Checker (Simplified)
-
-- Polls pools marked `migrated: false`
-- Uses DBC client to read **curve progress**
-- When `progress >= 1.0` → sets `migrated: true`
-
-> No tx sent; only status update in DB.
-
----
-
-## 🧮 Configs
-
-`configs.json` maps **quote** to its **config public key** (DBC blueprints):
-
-```json
-{
-  "SOL": "So11111111111111111111111111111111111111112",
-  "USDC": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  "USD1": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
-  "MET": "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL"
-}
-```
-
-> Replace/extend with your actual DBC blueprint/config public keys.
+- Upload: `POST /upload-file` (multipart: `file`, optional `target`)
+- Create Pool: `POST /create` (multipart fields + image)
+- Sign & Send: `POST /sign-and-send`
+- Confirm Creation: `POST /confirm-creation`
+- Token Image Proxy: `GET /token-image?url=<http-url>`
+- Comments/Nicknames/Leaderboard/Top Tokens/Platform Stats/Historical/Profiles
+- Fee Helpers: `POST /quote-fees`, `POST /claim-fees`
 
 ---
 
 ## 🖼️ Metadata Template (Pinata)
-
-Example JSON the server pins:
 
 ```json
 {
@@ -326,9 +168,9 @@ Example JSON the server pins:
   "symbol": "ZCOIN",
   "description": "A ZCOIN Launchpad token.",
   "image": "ipfs://<CID>",
-  "website": "https://zcoin.launch/",
-  "twitter": "https://twitter.com/zcoin",
-  "createdOn": "https://zcoin.launch/"
+  "website": "https://0xzerebro.io",
+  "twitter": "https://x.com/zCoinfdn",
+  "createdOn": "https://0xzerebro.io"
 }
 ```
 
@@ -336,46 +178,13 @@ Example JSON the server pins:
 
 ## 🛡️ Security Notes
 
-- **Never** commit `.env`, `vanity/` keys, or real RPC URLs.
-- Rotate **PINATA_JWT** periodically; scope to minimal permissions.
-- Use **rate limiting** and **auth** in production (endpoints accept public input).
-- Consider moving **partial signing** to a hardened worker with strict allowlists.
+- Do not commit `.env`, `vanity/` keys, or real RPC URLs.
+- Scope the Pinata JWT to least privilege.
+- Add auth/rate limits before production.
 
 ---
 
-## 🧪 cURL Examples
+## © Branding
 
-```bash
-# Create (no image)
-curl -X POST http://localhost:3000/create   -F name="ZCOIN Alpha"   -F symbol="ZCOIN"   -F description="Genesis token"   -F website="https://zcoin.launch/"   -F twitter="https://twitter.com/zcoin"   -F quote="SOL"   -F deployer="<YOUR_PUBKEY>"   -F initialBuyAmount="0.5"
-
-# Post a comment
-curl -X POST http://localhost:3000/api/comments   -H 'Content-Type: application/json'   -d '{"tokenMint":"<MINT>","wallet":"<WALLET>","text":"wen moon?"}'
-```
-
----
-
-## 🐞 Troubleshooting
-
-- **Could not load `configs.json` / `quests2.json`**  
-  Ensure files exist alongside `server.js` (or `/data/` on Render).
-- **Transaction not found on-chain** in `/confirm-creation`  
-  The server retries a few times; if still missing, increase RPC commitment or retries.
-- **No fees to claim**  
-  API may return `unclaimed: 0`. Wait or verify pool ownership.
-
----
-
-## 📜 License
-
-MIT © ZCOIN Launchpad Contributors
-
----
-
-## 🧩 Credits
-
-- Solana Web3.js  
-- Meteora DBC SDK  
-- Jupiter Data API  
-- Pinata SDK  
-- ws, lowdb, multer
+- Website: **https://0xzerebro.io**
+- X/Twitter: **@zCoinfdn** — https://x.com/zCoinfdn

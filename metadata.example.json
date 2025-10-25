@@ -1,0 +1,9 @@
+{
+  "name": "My ZCOIN",
+  "symbol": "ZCOIN",
+  "description": "A ZCOIN Launchpad token.",
+  "image": "ipfs://<CID>",
+  "website": "https://0xzerebro.io",
+  "twitter": "https://x.com/zCoinfdn",
+  "createdOn": "https://0xzerebro.io"
+}
