@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== ZCOIN Launchpad: one-shot setup ==="
+
+# 1) Create README.md
+cat > README.md <<'EOF'
 <!--
   ZCOIN Launchpad — README.md
   Nerfed / Redacted: external RPC, program IDs, secrets, and file paths are templated.
@@ -34,7 +41,7 @@
 - `POST /confirm-creation` — verifies tx, extracts pool address, **indexes token** in lowdb, awards quests.
 - Realtime chat: WebSocket channels per-token.
 - Stats/feeds: platform stats, top tokens, historical charts, holders, leaderboard, bounties, comments, nicknames.
-- **Nerfed/Redacted** bits are templated like `"<YOUR_...>"`. Replace with your real values.
+- **Nerfed/Redacted** bits are templated like "<YOUR_...>". Replace with your real values.
 
 > **Branding:** All references updated to **ZCOIN Launchpad / ZCOIN**.
 
@@ -108,7 +115,7 @@ RENDER=false
 SOLANA_RPC_URL=<YOUR_SOLANA_MAINNET_RPC_URL>  # e.g., https://<provider>/<key>
 ```
 
-> **Note:** The code currently defaults to a placeholder RPC in server; swap it to `process.env.SOLANA_RPC_URL` for production.
+> **Note:** The code defaults to `process.env.SOLANA_RPC_URL || https://api.mainnet-beta.solana.com` after running the setup patch step below.
 
 ---
 
@@ -235,7 +242,6 @@ GET /api/top-tokens
 ```http
 GET /api/bounties/:walletAddress
 ```
-> Copy updates: strings now reference **ZCOIN Launchpad** instead of old branding.
 
 ### Platform Stats
 ```http
@@ -347,10 +353,20 @@ Example JSON the server pins:
 
 ```bash
 # Create (no image)
-curl -X POST http://localhost:3000/create   -F name="ZCOIN Alpha"   -F symbol="ZCOIN"   -F description="Genesis token"   -F website="https://zcoin.launch/"   -F twitter="https://twitter.com/zcoin"   -F quote="SOL"   -F deployer="<YOUR_PUBKEY>"   -F initialBuyAmount="0.5"
+curl -X POST http://localhost:3000/create \
+  -F name="ZCOIN Alpha" \
+  -F symbol="ZCOIN" \
+  -F description="Genesis token" \
+  -F website="https://zcoin.launch/" \
+  -F twitter="https://twitter.com/zcoin" \
+  -F quote="SOL" \
+  -F deployer="<YOUR_PUBKEY>" \
+  -F initialBuyAmount="0.5"
 
 # Post a comment
-curl -X POST http://localhost:3000/api/comments   -H 'Content-Type: application/json'   -d '{"tokenMint":"<MINT>","wallet":"<WALLET>","text":"wen moon?"}'
+curl -X POST http://localhost:3000/api/comments \
+  -H 'Content-Type: application/json' \
+  -d '{"tokenMint":"<MINT>","wallet":"<WALLET>","text":"wen moon?"}'
 ```
 
 ---
@@ -379,3 +395,70 @@ MIT © ZCOIN Launchpad Contributors
 - Jupiter Data API  
 - Pinata SDK  
 - ws, lowdb, multer
+EOF
+
+# 2) Ensure dirs
+mkdir -p uploads vanity public image_cache vanity/used || true
+
+# 3) Create minimal placeholder zcoin.png (1x1 transparent pixel)
+cat > /tmp/zcoin.b64 <<'B64'
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=
+B64
+base64 -d /tmp/zcoin.b64 > public/zcoin.png
+rm -f /tmp/zcoin.b64
+
+# 4) Create sample configs.json if missing
+if [ ! -f configs.json ]; then
+cat > configs.json <<'JSON'
+{
+  "SOL": "So11111111111111111111111111111111111111112",
+  "USDC": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "USD1": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
+  "MET": "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL"
+}
+JSON
+fi
+
+# 5) Create sample quests2.json if missing
+if [ ! -f quests2.json ]; then
+echo "[]" > quests2.json
+fi
+
+# 6) Create .env template if missing
+if [ ! -f .env ]; then
+cat > .env <<'ENV'
+WALLET_SECRET=<YOUR_SERVER_WALLET_SECRET_BASE58>
+PINATA_JWT=<YOUR_PINATA_JWT>
+PORT=3000
+RENDER=false
+SOLANA_RPC_URL=<YOUR_SOLANA_MAINNET_RPC_URL>
+ENV
+fi
+
+# 7) Patch server.js branding/RPC/texts if present
+if [ -f server.js ]; then
+  # Replace hardcoded RPC with env-based fallback
+  perl -0777 -pe "s|new Connection\\(['\\\"]https?://[^'\\\"]+['\\\"],\\s*'confirmed'\\)|new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com', 'confirmed')|g" -i server.js
+
+  # Replace 'JUNKNET' banners with ZCOIN Launchpad
+  sed -i '' -e "s/JUNKNET server running/ZCOIN Launchpad server running/g" server.js 2>/dev/null || sed -i -e "s/JUNKNET server running/ZCOIN Launchpad server running/g" server.js
+
+  # Replace 'JUNKNET' occurrences (branding)
+  sed -i '' -e "s/JUNKNET/ZCOIN Launchpad/g" server.js 2>/dev/null || sed -i -e "s/JUNKNET/ZCOIN Launchpad/g" server.js
+
+  # Replace 'JUNK' token references with ZCOIN (conservative, keep symbols context)
+  sed -i '' -e "s/\\bJUNK\\b/ZCOIN/g" server.js 2>/dev/null || sed -i -e "s/\\bJUNK\\b/ZCOIN/g" server.js
+
+  # Replace createdOn URL
+  sed -i '' -e "s|https://junknet\\.dev/|https://zcoin.launch/|g" server.js 2>/dev/null || sed -i -e "s|https://junknet\\.dev/|https://zcoin.launch/|g" server.js
+
+  # Replace any user-facing text mentioning Junknet holdings
+  sed -i '' -e "s/No current holdings on ZCOIN Launchpad/No current holdings on ZCOIN Launchpad/g" server.js 2>/dev/null || true
+  sed -i '' -e "s/No current holdings on JUNKNET/No current holdings on ZCOIN Launchpad/g" server.js 2>/dev/null || sed -i -e "s/No current holdings on JUNKNET/No current holdings on ZCOIN Launchpad/g" server.js
+
+  # Ensure token-image fallback references zcoin.png (already in your code, but just in case)
+  sed -i '' -e "s|public/[A-Za-z0-9_-]*\\.png|public/zcoin.png|g" server.js 2>/dev/null || true
+fi
+
+echo "=== Done. Files created/updated: README.md, public/zcoin.png, configs.json, quests2.json, .env (if missing)."
+echo "If server.js existed, it was patched for ZCOIN Launchpad branding and env-based RPC."
