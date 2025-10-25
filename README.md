@@ -222,7 +222,7 @@ Replace/extend with your actual DBC blueprint/config public keys. Metadata Templ
   "description": "A ZCOIN Launchpad token.",
   "image": "ipfs://<CID>",
   "website": "https://0xzerebro.io/",
-  "twitter": "https://twitter.com/zcoin",
+  "twitter": "https://twitter.com/zCoinfdn",
   "createdOn": "https://0xzerebro.io/"
 }
 
@@ -234,7 +234,7 @@ curl -X POST http://localhost:3000/create \
   -F symbol="ZCOIN" \
   -F description="Genesis token" \
   -F website="https://0xzerebro.io/" \
-  -F twitter="https://twitter.com/zcoin" \
+  -F twitter="https://twitter.com/zCoinfdn" \
   -F quote="SOL" \
   -F deployer="<YOUR_PUBKEY>" \
   -F initialBuyAmount="0.5"
