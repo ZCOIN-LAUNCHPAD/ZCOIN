@@ -187,4 +187,4 @@ ZCOIN Launchpad server running on http://localhost:3000
 ## © Branding
 
 - Website: **https://0xzerebro.io**
-- X/Twitter: **@zCoinfdn** — https://x.com/zCoinfdn
+- X/Twitter: **https://x.com/zCoinfdn**
