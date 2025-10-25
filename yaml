@@ -1,0 +1,20 @@
+
+> On Render: use `/data/` for persistent volumes (paths are handled in code).
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file:
+
+```ini
+# --- Required ---
+WALLET_SECRET=<YOUR_SERVER_WALLET_SECRET_BASE58>
+PINATA_JWT=<YOUR_PINATA_JWT>
+
+# Optional overrides
+PORT=3000
+RENDER=false
+
+# Solana RPC (REDACTED HERE)
+SOLANA_RPC_URL=<YOUR_SOLANA_MAINNET_RPC_URL>  # e.g., https://<provider>/<key>
