@@ -1,4 +1,4 @@
-cat > README.md <<'EOF'
+
 <!--
   ZCOIN Launchpad — README.md
   Nerfed / Redacted: external RPC, program IDs, secrets, and file paths are templated.
