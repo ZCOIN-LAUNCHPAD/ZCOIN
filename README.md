@@ -35,7 +35,7 @@ Nerfed/Redacted bits are templated like "<YOUR_...>". Replace with your real val
 Branding: All references updated to ZCOIN Launchpad / ZCOIN.
  BrandingProduct: ZCOIN Launchpad
 Ticker/Examples: ZCOIN
-Default site (example): https://zcoin.launch/ (placeholder)
+Default site (example): https://0xzerebro.io/ (placeholder)
 
  Features Pool Creation via Meteora Dynamic Bonding Curve SDK
  IPFS Uploads (Pinata) for token image + metadata JSON
@@ -112,7 +112,7 @@ ZCOIN Launchpad server running on http://localhost:3000
 Program IDs → keep your own; placeholders in docs.
 External fee config list → example keys shown as comments.
 Brand → ZCOIN Launchpad/ZCOIN.
-Default links like createdOn set to https://zcoin.launch/ (placeholder).
+Default links like createdOn set to https://0xzerebro.io/ (placeholder).
 
  REST APIUpload
 
@@ -221,9 +221,9 @@ Replace/extend with your actual DBC blueprint/config public keys. Metadata Templ
   "symbol": "ZCOIN",
   "description": "A ZCOIN Launchpad token.",
   "image": "ipfs://<CID>",
-  "website": "https://zcoin.launch/",
+  "website": "https://0xzerebro.io/",
   "twitter": "https://twitter.com/zcoin",
-  "createdOn": "https://zcoin.launch/"
+  "createdOn": "https://0xzerebro.io/"
 }
 
  Security NotesNever commit .env, vanity/ keys, or real RPC URLs.Rotate PINATA_JWT periodically; scope to minimal permissions.Use rate limiting and auth in production (endpoints accept public input).Consider moving partial signing to a hardened worker with strict allowlists. cURL Examplesbash
@@ -233,7 +233,7 @@ curl -X POST http://localhost:3000/create \
   -F name="ZCOIN Alpha" \
   -F symbol="ZCOIN" \
   -F description="Genesis token" \
-  -F website="https://zcoin.launch/" \
+  -F website="https://0xzerebro.io/" \
   -F twitter="https://twitter.com/zcoin" \
   -F quote="SOL" \
   -F deployer="<YOUR_PUBKEY>" \
